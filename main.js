@@ -2,15 +2,16 @@ async function handleSubmit(event) {
   event.preventDefault();
   const inputValue = document.querySelector('.js-search-input').value;
   const searchQuery = inputValue.trim();
-  const spinner = document.querySelector('.js-spinner');
-  const searchResults = document.querySelector('.js-search-results');
 
+  const searchResults = document.querySelector('.js-search-results');
   searchResults.innerHTML = '';
+
+  const spinner = document.querySelector('.js-spinner');
   spinner.classList.remove('hidden');
 
   try {
     const results = await searchWikipedia(searchQuery);
-    if (results.length === 0) {
+    if (results.query.searchinfo.totalhits === 0) {
       alert('No results found. Try different keywords');
       return;
     }
@@ -31,15 +32,13 @@ async function searchWikipedia(searchQuery) {
     throw Error(response.statusText);
   }
   const json = await response.json();
-  const results = json.query.search;
-  return results;
+  return json;
 }
 
 function displayResults(results) {
   const searchResults = document.querySelector('.js-search-results');
-  searchResults.innerHTML = '';
-  results.forEach(result => {
-    const url = encodeURI(`https://en.wikipedia.org/wiki/${result.title}`);
+  results.query.search.forEach((result) => {
+    const url = `https://en.wikipedia.org/?curid=${result.pageid}`;
 
     searchResults.insertAdjacentHTML(
       'beforeend',
